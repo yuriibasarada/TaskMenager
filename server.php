@@ -1,6 +1,8 @@
 <?php
 
+use Authenticator\Authentication;
 use Authenticator\Guard;
+use Authenticator\SignInController;
 use Core\ErrorHandler;
 use Core\JsonRequestDecoder;
 use Core\Router;
@@ -12,6 +14,7 @@ use React\EventLoop\Factory;
 use React\Http\Server;
 use React\MySQL\Factory as FactorySQL;
 use Sikei\React\Http\Middleware\CorsMiddleware;
+use Authenticator\Storage as User;
 
 require_once 'vendor/autoload.php';
 
@@ -22,11 +25,15 @@ $loop = Factory::create();
 
 $mysql = new FactorySQL($loop);
 $uri = getenv('DB_LOGIN') . ':' . getenv('DB_PASS') . '@' . getenv('DB_HOST') . '/' . getenv('DB_NAME');
-$connection = $mysql->createConnection($uri);
+$connection = $mysql->createLazyConnection($uri);
 
 $guard = new Guard(getenv('JWT_KEY'));
 
+$user = new User($connection);
+$authenticator = new Authentication($user, getenv('JWT_KEY'));
+
 $routes = new RouteCollector(new Std(), new GroupCountBased());
+$routes->post('/login', new SignInController($authenticator));
 
 $settings = [
     'allow_origin'      => ['*'],

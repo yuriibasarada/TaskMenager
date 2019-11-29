@@ -12,20 +12,22 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20191129211725 extends AbstractMigration
 {
-    public function getDescription() : string
-    {
-        return '';
-    }
+
 
     public function up(Schema $schema) : void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-
+        $sql = "CREATE TABLE user(
+    id int UNSIGNED auto_increment not null,
+    email VARCHAR(255) not null ,
+    password varchar(255) not null ,
+    name varchar(255) not null,
+    primary key (id)
+)";
+        $this->addSql($sql);
     }
 
     public function down(Schema $schema) : void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-
+        $this->addSql('DROP TABLE user');
     }
 }
